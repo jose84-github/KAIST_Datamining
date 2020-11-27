@@ -68,12 +68,12 @@ import numpy as np
 print("특성 중요도:\n{}".format(dcs_tree.feature_importances_))
 feature_names = dfx[0:9]
 
-def plot_feature_importances_pep(model):
-    n_features = dfx.shape[1]
-    plt.barh(range(n_features), model.feature_importances_, align='center')
-    plt.yticks(np.arange(n_features), feature_names)
-    plt.xlabel("특성 중요도", fontname = 'Malgun Gothic')
-    plt.ylabel("특성", fontname = 'Malgun Gothic')
-    plt.ylim(-1, n_features)
+# def plot_feature_importances_pep(model):
+#     n_features = dfx.shape[1]
+#     plt.barh(range(n_features), model.feature_importances_, align='center')
+#     plt.yticks(np.arange(n_features), feature_names)
+#     plt.xlabel("특성 중요도", fontname = 'Malgun Gothic')
+#     plt.ylabel("특성", fontname = 'Malgun Gothic')
+#     plt.ylim(-1, n_features)
 
-plot_feature_importances_pep(dcs_tree)
+# plot_feature_importances_pep(dcs_tree)
