@@ -37,22 +37,33 @@ def feture_scaling(df, scaling_strategy="min-max", column=None):
 
 df['dependents'] = df['married']+df['children']+1
 df['realincome'] = np.where(df['children']==0, df['income'], df['income']/df['children'])
+df['exp_income'] = (df['income']/df['age'])*65
 df['housepoor'] = np.where((df['save_act']==0) & (df['mortgage']==1) , 1, 0)
+df['transaction'] = (df['save_act'])*0.7 + (df['current_act'])*0.1 + (df['mortgage'])*0.2
 
-feture_scaling(df,column=['age','realincome'])
+#df['expense_lv'] = (df['car'])*0.1 + (df['save_act'])*0.7 + (df['mortgage'])*0.2
+#df['unmar_weight'] = (30-df['age'])*(1-df['married'])
+#df['car'] = df['dependents']*df['car']
+#df['save_act'] = df['dependents']*df['save_act']
+#df['mortgage'] = df['dependents']*df['mortgage']
+#df['transaction'] = (df['save_act'])*0.7 + (df['current_act'])*0.1 + (df['mortgage'])*0.2
+#df['unmarried_init'] = np.where((df['married']==0) & (df['children']==0) & (df['save_act']==0) , 1, 0)
+#df['one_child'] = np.where((df['children']==1), 1, 0)
+#df['three_child'] = np.where((df['children']==3), 1, 0)
 
-df = df.drop(['sex','region','income','married','children','car', 'save_act', 'current_act','mortgage'],axis=1)
+feture_scaling(df,column=['age','dependents','realincome','exp_income'])
+
+df = df.drop(['region','income','children'],axis=1)
 df.head(10)
 
 #Training - Test Set 만들기
 from sklearn.model_selection import train_test_split
 dfx = df.drop(['id','pep'],axis=1)
-#dfx.head(3)
 dfy=df['pep']
 
 x_train, x_test, y_train, y_test = train_test_split(dfx,dfy,test_size=0.3, random_state=0)
-#x_train.shape
-#x_test.shape
+x_train.shape
+x_test.shape
 
 #DCS Tree 만들기
 
@@ -62,7 +73,7 @@ dcs_tree = DecisionTreeClassifier(max_depth=6, random_state=0)
 dcs_tree.fit(x_train, y_train)
 
 predicted = dcs_tree.predict(x_test)
-#print(predicted)
+print(predicted)
 print('score is %s'%(dcs_tree.score(x_test, y_test)))
 
 #DCS Tree 시각화
@@ -87,12 +98,12 @@ display(graphviz.Source(dot_graph))
 print("특성 중요도:\n{}".format(dcs_tree.feature_importances_))
 feature_names = dfx[0:9]
 
-# def plot_feature_importances_pep(model):
-#     n_features = dfx.shape[1]
-#     plt.barh(range(n_features), model.feature_importances_, align='center')
-#     plt.yticks(np.arange(n_features), feature_names)
-#     plt.xlabel("특성 중요도", fontname = 'Malgun Gothic')
-#     plt.ylabel("특성", fontname = 'Malgun Gothic')
-#     plt.ylim(-1, n_features)
+def plot_feature_importances_pep(model):
+    n_features = dfx.shape[1]
+    plt.barh(range(n_features), model.feature_importances_, align='center')
+    plt.yticks(np.arange(n_features), feature_names)
+    plt.xlabel("특성 중요도", fontname = 'Malgun Gothic')
+    plt.ylabel("특성", fontname = 'Malgun Gothic')
+    plt.ylim(-1, n_features)
 
-# plot_feature_importances_pep(dcs_tree)
+plot_feature_importances_pep(dcs_tree)
