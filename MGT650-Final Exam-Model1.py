@@ -22,24 +22,37 @@ df.loc[:,['age', 'income']].plot.box(subplots=True, layout=(2,1),figsize=(10,10)
 #scatter_matrix(df[attributes], figsize=(12,8))
 
 #고객 데이터 전처리
-def feture_scaling(df, scaling_strategy="min-max", column=None):
-    if column == None:
-        column = [column_name for column_name in df.columns]
-    for column_name in column:
-        if scaling_strategy == "min-max":
-            df[column_name] = ( df[column_name] - df[column_name].min() ) /\
-                            (df[column_name].max() - df[column_name].min()) 
-        elif scaling_strategy == "z-score":
-            df[column_name] = ( df[column_name] - \
-                               df[column_name].mean() ) /\
-                            (df[column_name].std() )
-    return df
+# def feture_scaling(df, scaling_strategy="min-max", column=None):
+#     if column == None:
+#         column = [column_name for column_name in df.columns]
+#     for column_name in column:
+#         if scaling_strategy == "min-max":
+#             df[column_name] = ( df[column_name] - df[column_name].min() ) /\
+#                             (df[column_name].max() - df[column_name].min()) 
+#         elif scaling_strategy == "z-score":
+#             df[column_name] = ( df[column_name] - \
+#                                df[column_name].mean() ) /\
+#                             (df[column_name].std() )
+#     return df
 
-df['dependents'] = df['married']+df['children']+1
-df['realincome'] = np.where(df['children']==0, df['income'], df['income']/df['children'])
-df['exp_income'] = (df['income']/df['age'])*65
-df['housepoor'] = np.where((df['save_act']==0) & (df['mortgage']==1) , 1, 0)
-df['transaction'] = (df['save_act'])*0.7 + (df['current_act'])*0.1 + (df['mortgage'])*0.2
+# bins = [0, 20, 30, 40, 50, 60, 70]
+# bins_names = ['10', '20', '30', '40', '50', '60']
+# categories = pd.cut(df['age'], bins, labels=bins_names)
+# df['age'] = categories
+# df['age'] = pd.to_numeric(df['age'])
+
+# data_category = df.loc[:, ['sex','region','married','car','save_act','current_act','mortgage']]
+# data_category
+# data_dummy = pd.get_dummies(data_category, columns=['sex','region','married','car','save_act','current_act','mortgage'])
+# data_dummy
+# df = df.drop(columns=['sex','region','married','car','save_act','current_act','mortgage'])
+# df = pd.concat([df, data_dummy],axis=1)
+
+# df['dependents'] = df['married_1']+df['children']+1
+# df['realincome'] = np.where(df['children']==0, df['income'], df['income']/df['children'])
+# df['exp_income'] = (df['income']/df['age'])*65
+# df['housepoor'] = np.where((df['save_act_1']==0) & (df['mortgage_1']==1) , 1, 0)
+# df['transaction'] = (df['save_act_1'])*0.7 + (df['current_act_1'])*0.1 + (df['mortgage_1'])*0.2
 
 #df['expense_lv'] = (df['car'])*0.1 + (df['save_act'])*0.7 + (df['mortgage'])*0.2
 #df['unmar_weight'] = (30-df['age'])*(1-df['married'])
@@ -51,10 +64,9 @@ df['transaction'] = (df['save_act'])*0.7 + (df['current_act'])*0.1 + (df['mortga
 #df['one_child'] = np.where((df['children']==1), 1, 0)
 #df['three_child'] = np.where((df['children']==3), 1, 0)
 
-feture_scaling(df,column=['age','dependents','realincome','exp_income'])
-
-df = df.drop(['region','income','children'],axis=1)
-df.head(10)
+# feture_scaling(df,column=['age','dependents','realincome','exp_income'])
+# df = df.drop(['income','children'],axis=1)
+# df.head(10)
 
 #Training - Test Set 만들기
 from sklearn.model_selection import train_test_split
@@ -76,22 +88,22 @@ predicted = dcs_tree.predict(x_test)
 print(predicted)
 print('score is %s'%(dcs_tree.score(x_test, y_test)))
 
-#DCS Tree 시각화
+# #DCS Tree 시각화
 
-from sklearn.tree import export_graphviz
-import graphviz
+# from sklearn.tree import export_graphviz
+# import graphviz
 
-export_graphviz(dcs_tree, out_file='iris_tree.dot')
-# dot = graphviz.Source(iris)
-# dot.format='png'
-# dot.render(filename='tree.png')
+# export_graphviz(dcs_tree, out_file='iris_tree.dot')
+# # dot = graphviz.Source(iris)
+# # dot.format='png'
+# # dot.render(filename='tree.png')
 
-import graphviz
-from IPython.display import display 
+# import graphviz
+# from IPython.display import display 
 
-with open("iris_tree.dot") as f:
-    dot_graph = f.read()
-display(graphviz.Source(dot_graph))
+# with open("iris_tree.dot") as f:
+#     dot_graph = f.read()
+# display(graphviz.Source(dot_graph))
 
 #DCS Tree 특성 중요도
 
