@@ -1,79 +1,108 @@
 import pandas as pd
-from sklearn.preprocessing import minmax_scale
-
-#DCS Tree 데이터 전처리 함수
-def feture_scaling(df, scaling_strategy="min-max", column=None):
-    if column == None:
-        column = [column_name for column_name in df.columns]
-    for column_name in column:
-        if scaling_strategy == "min-max":
-            df[column_name] = ( df[column_name] - df[column_name].min() ) /\
-                            (df[column_name].max() - df[column_name].min()) 
-        elif scaling_strategy == "z-score":
-            df[column_name] = ( df[column_name] - \
-                               df[column_name].mean() ) /\
-                            (df[column_name].std() )
-    return df
-
-df = pd.read_csv('data_pepTestCustomers.csv')
-df.head(3)
-#feture_scaling(df,column=["region"])
-#feture_scaling(df,"z-score", column=["age","region","income","children"])
-#df.head(10)
-
-#Training - Test Set 만들기
 from sklearn.model_selection import train_test_split
-dfx = df.drop(['id','pep'],axis=1)
-dfx.head(3)
-dfy=df['pep']
-dfx = minmax_scale(dfx)
-print(dfx)
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+import os
+from xgboost import XGBClassifier
+from sklearn.ensemble import VotingClassifier
 
-x_train, x_test, y_train, y_test = train_test_split(dfx,dfy,test_size=0.3, random_state=0)
+#1.데이터 이해
+df = pd.read_csv('data_pepTestCustomers.csv')
+print('데이터 형태')
+df.info()
+df.head(10)
+print('숫자형 데이터 특징')
+df.describe()
+df.hist(bins=30, figsize=(20,15))
+print('변수 상관관계')
+df.corr()
+df.corr().pep.sort_values(ascending=False)
+plt.matshow(df.corr())
+print('이상치 탐색')
+df.loc[:,['age', 'income']].plot.box(subplots=True, layout=(2,1),figsize=(10,10))
+
+#2.데이터 준비
+## 예측을 위한 기존 X 변수들을 활용한 새로운 변수 생성
+#1) 가족수(부양가족수))
+df['dependents1'] = df['married']+df['children']+1
+df['dependents2'] = df['married']+df['children']
+
+#2) 실질소득금액 (부양가족수로 나눴을 경우 pep와의 Corr값이 떨어져서 그냥 Children으로 나눔)
+df['realincome1'] = np.where(df['children']==0, df['income'], df['income']/df['children'])
+df['realincome2'] = df['income']/df['dependents1']
+df['realincome3'] = df['married']+df['children']*0.5+1
+df['realincome4'] = np.where(df['married']==0, df['income'], df['income']/2)
+df['realincome5'] = np.where(df['dependents2']==0, df['income'], df['income']/df['dependents2'] )
+
+#3) 기대 수익 (각 개인의 나이별 단위 소득금액 x 정년 퇴직나이65세 = 최대 얼마까지 벌수 있는지를 나타냄)
+df['exp_income'] = (df['income']/df['age'])*65
+df['exp_income2'] = df['income']*(65-df['age'])
+
+#4) 적금은 없지만 모기지만 있는 개인들의 경우 (하우스푸어) Pep와의 corr값이 높음
+df['housepoor'] = np.where((df['save_act']==0) & (df['mortgage']==1) , 1, 0)
+
+#5) 기존 고객(거래가 있는) 여부에 따라 각 거래에 가중치를 부여
+df['transaction'] = (df['save_act'])*0.7 + (df['current_act'])*0.1 + (df['mortgage'])*0.2
+
+#6) 범주형 데이터인 지역(region) 정보를 인코딩하여 추가하고 region 삭제
+region_enc=pd.get_dummies(df.region)
+region_enc.columns=['region_0', 'region_1', 'region_2', 'region_3']
+df=pd.concat([df,region_enc], axis=1)
+df.drop('region', axis = 1, inplace=True)
+
+#7) 자녀 유무
+df['children_YN'] = np.where(df['children']==0, 0, 1)
+#df.drop(['children','car','save_act','current_act','mortgage'], axis = 1, inplace=True)
+df.head(10)
+
+## train / test data 분리
+dfx = df.drop(['id', 'pep'], axis = 1)
+dfy = df['pep']
+
+x_train, x_test, y_train, y_test = train_test_split(dfx, dfy, test_size = 0.25, random_state = 0)
+x_train.head(10)
 x_train.shape
 x_test.shape
 
-#DCS Tree 만들기
+## x_train 데이터를 기준으로 x_train과 x_test 데이터를 nomalizing
+scaler = StandardScaler()
+#scaler = MinMaxScaler()
+scaler.fit(x_train)
+x_train_scaled = scaler.transform(x_train)
+x_test_scaled = scaler.transform(x_test)
 
-from sklearn.tree import DecisionTreeClassifier
+#feature importance
+n_feature = dfx.shape[1]
+index = np.arange(n_feature)
+plt.barh(index, rf.feature_importances_, align='center')
+plt.yticks(index, dfx.columns)
+plt.ylim(-1, n_feature)
+plt.xlabel('feature importance', size=15)
+plt.ylabel('feature', size=15)
+plt.show()
 
-dcs_tree = DecisionTreeClassifier(max_depth=6, random_state=0)
-dcs_tree.fit(x_train, y_train)
-
-predicted = dcs_tree.predict(x_test)
+#3.모델링 + 평가
+# RandomForest 실행
+rf = RandomForestClassifier(n_estimators = 500, max_depth = 10)
+rf.fit(x_train_scaled, y_train)
+predicted = rf.predict(x_test_scaled)
 print(predicted)
-print('score is %s'%(dcs_tree.score(x_test, y_test)))
 
-#DCS Tree 시각화
+# GradientBoostingClassifier (앙상블 - 그라디언트 부스트)
+gb = GradientBoostingClassifier(learning_rate=0.05, n_estimators = 1000)
+gb.fit(x_train_scaled, y_train)
 
-from sklearn.tree import export_graphviz
-import graphviz
+# Voting (앙상블 - Voting)
+voting_model = VotingClassifier(estimators=[('GradientBoostingClassifier', gb), ('AdaBoostClassifier', ab), ('XGBClassifier',xgb), ('RandomForestClassifier', rf)], voting='soft')
+voting_model.fit(x_train_scaled, y_train)
 
-export_graphviz(dcs_tree, out_file='iris_tree.dot')
-"""dot = graphviz.Source(iris)
-dot.format='png'
-dot.render(filename='tree.png') """
-
-import graphviz
-from IPython.display import display 
-
-with open("iris_tree.dot") as f:
-    dot_graph = f.read()
-display(graphviz.Source(dot_graph))
-
-#DCS Tree 특성 중요도
-import matplotlib.pyplot as plt
-import numpy as np
-
-print("특성 중요도:\n{}".format(dcs_tree.feature_importances_))
-feature_names = dfx[0:9]
-
-# def plot_feature_importances_pep(model):
-#     n_features = dfx.shape[1]
-#     plt.barh(range(n_features), model.feature_importances_, align='center')
-#     plt.yticks(np.arange(n_features), feature_names)
-#     plt.xlabel("특성 중요도", fontname = 'Malgun Gothic')
-#     plt.ylabel("특성", fontname = 'Malgun Gothic')
-#     plt.ylim(-1, n_features)
-
-# plot_feature_importances_pep(dcs_tree)
+print('Random Forest score is %s'%(rf.score(x_test_scaled, y_test)))
+print('Gradientboost score is %s'%(gb.score(x_test_scaled, y_test)))
+print('Voting score is %s'%(voting_model.score(x_test_scaled, y_test)))
