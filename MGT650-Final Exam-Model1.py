@@ -2,6 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from pandas.plotting import scatter_matrix
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
 
 #고객 데이터 이해
 df = pd.read_csv('data_pepTestCustomers.csv')
@@ -69,7 +71,6 @@ df.loc[:,['age', 'income']].plot.box(subplots=True, layout=(2,1),figsize=(10,10)
 # df.head(10)
 
 #Training - Test Set 만들기
-from sklearn.model_selection import train_test_split
 dfx = df.drop(['id','pep'],axis=1)
 dfy=df['pep']
 
@@ -78,8 +79,6 @@ x_train.shape
 x_test.shape
 
 #DCS Tree 만들기
-
-from sklearn.tree import DecisionTreeClassifier
 
 dcs_tree = DecisionTreeClassifier(max_depth=6, random_state=0)
 dcs_tree.fit(x_train, y_train)
