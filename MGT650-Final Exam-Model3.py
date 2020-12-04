@@ -94,29 +94,36 @@ plt.show()
 hiddenLayerSize =8
 mlp =  MLPClassifier(solver='lbfgs', alpha=0.0001, hidden_layer_sizes=(hiddenLayerSize,8), learning_rate='constant', max_iter = 1000, random_state=0)
 mlp.fit(x_train_scaled, y_train)
-print('score is %s'%(mlp.score(x_test_scaled, y_test)))
+
 
 # Logistic Regression (선형회귀)
 lr = LogisticRegression(solver='lbfgs',max_iter=1000)
 lr.fit(x_train_scaled, y_train)
-print('score is %s'%(lr.score(x_test_scaled, y_test)))
+
 
 # XGB (앙상블 - XG부스트)
 xgb = XGBClassifier(n_estimators=1000)
 xgb.fit(x_train_scaled, y_train)
-print('score is %s'%(xgb.score(x_test_scaled, y_test)))
+
 
 # AdaBoostClassifier  (앙상블 - 아다부스트)
 ab = AdaBoostClassifier(learning_rate=0.2, n_estimators = 1000, random_state=0)
 ab.fit(x_train_scaled, y_train)
-print('score is %s'%(ab.score(x_test_scaled, y_test)))
+
 
 # KNN (K-Nearest Neighbor)
 knn = KNeighborsClassifier(n_neighbors=7)
 knn.fit(x_train_scaled, y_train)
-print('score is %s'%(knn.score(x_test_scaled, y_test)))
+
 
 # SVM (Support Vector Machine)
 svm = SVC()
 svm.fit(x_train_scaled, y_train)
-print('score is %s'%(svm.score(x_test_scaled, y_test)))
+
+
+print('MLP score is %s'%(mlp.score(x_test_scaled, y_test)))
+print('Logistic Regression score is %s'%(lr.score(x_test_scaled, y_test)))
+print('XGboost score is %s'%(xgb.score(x_test_scaled, y_test)))
+print('Adaboost score is %s'%(ab.score(x_test_scaled, y_test)))
+print('KNN score is %s'%(knn.score(x_test_scaled, y_test)))
+print('SVM score is %s'%(svm.score(x_test_scaled, y_test)))
