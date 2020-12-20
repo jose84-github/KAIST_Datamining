@@ -140,7 +140,54 @@ print('final params', gcv.best_params_)   # 최적의 파라미터 값 출력
 print('best score', gcv.best_score_)      # 최고의 점수
 '''
 
-## 다. Voting(RF, GB, XGB, CatBoost, MLP)
+## 다. GradientBoostingClassifier
+# 모델 구축 및 평가
+gb = GradientBoostingClassifier(loss='exponential', n_estimators = 15, criterion='friedman_mse', max_features='auto', random_state=0)
+gb.fit(x_train_scaled, y_train)
+
+# 옵션 최적화
+'''
+param_grid={'n_estimators' :list(range(1,100)),
+                 'loss':['exponential', 'deviance'],
+                 'criterion' : ['friedman_mse', 'mse', 'mae'],
+                 'max_features': ['auto', 'sqrt', 'log2']}
+cv=KFold(n_splits=6, random_state=0)
+gcv=GridSearchCV(gb, param_grid=param_grid, cv=cv, scoring='accuracy', n_jobs=4)
+gcv.fit(x_train_scaled, y_train)
+print('final params', gcv.best_params_)   # 최적의 파라미터 값 출력
+print('best score', gcv.best_score_)      # 최고의 점수
+'''
+
+## 라. Extreme Gradient Boosting(XGB)
+# 모델 구축 및 평가
+xgb = XGBClassifier(booster='gbtree', colsample_bylevel=0.9, colsample_bytree=0.8, gamma=2, max_depth=6, min_child_weight=2, n_estimators=1000, nthread=4, objective='binary:logistic', random_state=0)
+xgb.fit(x_train_scaled, y_train)
+
+# 옵션 최적화
+'''
+param_grid={'booster' :['gbtree'],
+                 'silent':[True],
+                 'max_depth':[6,10,11],
+                 'min_child_weight':[1,2,6],
+                 'gamma':[1,2,3],
+                 'nthread':[4,5],
+                 'colsample_bytree':[0.7, 0.8],
+                 'colsample_bylevel':[0.8, 0.9],
+                 'n_estimators':[500],
+                 'objective':['binary:logistic'],
+                 'random_state':[0]}
+cv=KFold(n_splits=6, random_state=1)
+gcv=GridSearchCV(xgb, param_grid=param_grid, cv=cv, scoring='accuracy', n_jobs=4)
+gcv.fit(x_train,y_train)
+print('final params', gcv.best_params_)   # 최적의 파라미터 값 출력
+print('best score', gcv.best_score_)      # 최고의 점수
+'''
+## 마. Multi-Layer Perceptron(MLP)
+# 모델 구축 및 평가
+mlp =  MLPClassifier(solver='adam', alpha=0.001, hidden_layer_sizes=(8,8), learning_rate='adaptive', max_iter = 1000, random_state=0)
+mlp.fit(x_train_scaled, y_train)
+
+## 바. Voting(RF, GB, XGB, CatBoost, MLP)
 # 모델 구축 및 평가
 voting_model = VotingClassifier(estimators=[('MLPClassifier', mlp), ('XGBClassifier', xgb), ('GradientBoostingClassifier', gb), ('CatBoostClassifier',cb), ('RandomForestClassifier', rf)], voting='hard')
 voting_model.fit(x_train_scaled, y_train)
