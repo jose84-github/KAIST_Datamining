@@ -1,3 +1,5 @@
+### 데이터마이닝 실습### 연금상품 가입 예측 모델링 - 의사결정트리
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
