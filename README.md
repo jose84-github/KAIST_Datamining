@@ -12,13 +12,6 @@ To predict whether a pension insurance product is subscribed or not by utilizing
 ```
 - 12 variables, 600 records
 ```
-<STYLE>
-tr{
-font-size: 10px
-}
-td{
-font-size: 10px}
-</STYLE>
 |No|Column|Count|Type|
 |:-:|:-:|:-:|:-:|
 |0|ID|600|Object|
