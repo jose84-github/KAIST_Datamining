@@ -12,13 +12,7 @@ To predict whether a pension insurance product is subscribed or not by utilizing
 ```
 - 12 variables, 600 records
 ```
-<STYLE>
-tr{
-font-size: 10px
-}
-td{
-font-size: 10px}
-</STYLE>
+
 |No|Column|Count|Type|
 |:-:|:-:|:-:|:-:|
 |0|ID|600|Object|
@@ -50,14 +44,20 @@ font-size: 10px}
 • Optimize parameters used in the modeling process by Grid Search  
 • Selecting various modeling techniques and algorithms that can accurately predict PEP values  
 • Chosen 10 trial Model (*Top 3 model)
- - Decision Tree
- - Random Forest* (90.56%)
- - Catboost* (91.11%)
- - Voting* (90.56%)
- - Gradient Boosting
- - Multilayer Perceptron
- - Support Vector Machine
- - Adaboost
- - K-Nearest Neighbor
- - Logistic Regression
+
+    1. MGT650-Final Exam-Model1.py
+    - Decision Tree
+    
+    2. MGT650-Final Exam-Model2.py
+    - Random Forest* (90.56%)
+    - Catboost* (91.11%)
+    - Voting* (90.56%)
+
+    3. MGT650-Final Exam-Model3.py
+    - Gradient Boosting
+    - Multilayer Perceptron
+    - Support Vector Machine
+    - Adaboost
+    - K-Nearest Neighbor
+    - Logistic Regression
  ```
