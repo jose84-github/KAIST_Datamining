@@ -3,12 +3,12 @@
 
 ### 1. Introduction
 
-**▷ Objective**
+**▷ Objective**  
 `To predict whether a pension insurance product is subscribed or not by utilizing customer data.`
 
 ---
 
-**▷ Data**
+**▷ Data**  
 `12 variables, 600 records`
 
 ---
