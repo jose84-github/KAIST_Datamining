@@ -12,6 +12,28 @@ To predict whether a pension insurance product is subscribed or not by utilizing
 ```
 - 12 variables, 600 records
 ```
+<STYLE>
+tr{
+font-size: 10px
+}
+td{
+font-size: 10px}
+</STYLE>
+|No|Column|Count|Type|
+|:-:|:-:|:-:|:-:|
+|0|ID|600|Object|
+|1|Age|600|Int64|
+|2|Sex|600|Int64|
+|3|Region|600|Int64|
+|4|Income|600|Float64|
+|5|Married|600|Int64|
+|6|Children|600|Int64|
+|7|Car|600|Int64|
+|8|Save_Act|600|Int64|
+|9|Current_Act|600|Int64|
+|10|Mortgage|600|Int64|
+|11|PEP|600|Int64|
+
 ---
 **▷ Requirements**
 ```
